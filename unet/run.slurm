@@ -23,17 +23,4 @@ cd /home/kyn5du/autoresearch
 
 python program.py
 
-python -c "
-from data_load import get_dataloaders
-from evaluate import evaluate_checkpoint
-import glob, os
-
-ckpts = sorted(glob.glob('sbatch_output/model_weights--*.pth'))
-if ckpts:
-    latest = ckpts[-1]
-    print(f'Evaluating {latest}')
-    _, _, test_loader = get_dataloaders('content/data/xview2_jpeg', batch_size=12)
-    evaluate_checkpoint(latest, test_loader)
-else:
-    print('No checkpoint found in sbatch_output/')
-"
+python evaluate.py

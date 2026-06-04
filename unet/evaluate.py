@@ -442,6 +442,9 @@ def run_evaluation(model, dataset, device="cuda"):
     print("\nDamage Confusion Matrix (raw):")
     print(results["damage_cm"])
 
+    print("\nFull Results:")
+    print(results)
+
     return results
 
 
@@ -452,3 +455,17 @@ def evaluate_checkpoint(weight_path, dataset, device="cuda"):
     model.load_state_dict(torch.load(weight_path, map_location=device, weights_only=True))
 
     return run_evaluation(model, dataset, device=device)
+
+
+if __name__ == "__main__":
+    from data_load import get_dataloaders
+    import glob, os
+
+    ckpts = sorted(glob.glob('sbatch_output/model_weights--*.pth'))
+    if ckpts:
+        latest = ckpts[-1]
+        print(f'Evaluating {latest}')
+        _, _, test_loader = get_dataloaders('content/data/xview2_jpeg', batch_size=12)
+        evaluate_checkpoint(latest, test_loader)
+    else:
+        print('No checkpoint found in sbatch_output/')

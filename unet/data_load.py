@@ -12,7 +12,7 @@ from torch.backends import cudnn
 import albumentations as A
 
 
-SAMPLE_FRACTION = 0.2  # < 1.0 to randomly subsample train+test for quick debugging
+SAMPLE_FRACTION = 0.4  # < 1.0 to randomly subsample train+test for quick debugging
 
 
 def _subsample(dataset, fraction, seed):

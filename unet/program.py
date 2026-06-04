@@ -19,7 +19,7 @@ PREVENT_TQDM = False
 BATCH_SIZE = 12
 PRINT_EPOCH = 5
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
-EPOCHS = 20
+EPOCHS = 10
 
 train_transform = A.Compose([
     A.HorizontalFlip(p=0.5),
