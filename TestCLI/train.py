@@ -247,7 +247,7 @@ if __name__ == "__main__":
     # Engine Ingestion
     base_folder = "content/data/xview2_jpeg"
     train_transform = A.Compose([
-        A.RandomCrop(640, 640, p=1.0),
+        A.RandomResizedCrop(size=(640, 640), scale=(0.5, 1.0), p=1.0),
         A.HorizontalFlip(p=0.5),
         A.VerticalFlip(p=0.5),
         A.RandomRotate90(p=0.5),
