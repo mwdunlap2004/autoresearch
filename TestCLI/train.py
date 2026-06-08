@@ -49,7 +49,9 @@ class ModelConfig:
 
 # Global Optimization Setup
 TIME_BUDGET = 900       # Target training timeline in seconds (15 min wall clock)
-BASE_LR = 1e-4           # Global structural learning rate
+BASE_LR = 1e-3           # Base learning rate (OneCycleLR will schedule around this)
+MAX_LR = 3e-3            # Peak LR for OneCycleLR
+PCT_START = 0.1          # Warmup fraction for OneCycleLR
 BATCH_SIZE = 12          # Set dynamically or overwritten manually
 SEED = 42
 
@@ -258,6 +260,11 @@ if __name__ == "__main__":
     model = UNetDualHead(config).to(device)
     #model = torch.compile(model, dynamic=False)
     optimizer = model.setup_optimizer(lr=BASE_LR)
+    ESTIMATED_STEPS = 650  # ~1.35 steps/sec * 900s / batch repeats
+    scheduler = torch.optim.lr_scheduler.OneCycleLR(
+        optimizer, max_lr=MAX_LR, total_steps=ESTIMATED_STEPS,
+        pct_start=PCT_START, div_factor=10, final_div_factor=100
+    )
     scaler = torch.amp.GradScaler("cuda" if device.type == "cuda" else "")
     
     print(f"Engine starting on: {device}. Configuration: {asdict(config)}")
@@ -295,6 +302,7 @@ if __name__ == "__main__":
         scaler.scale(loss).backward()
         scaler.step(optimizer)
         scaler.update()
+        scheduler.step()
         
         torch.cuda.synchronize()
         dt = time.time() - t0
@@ -338,8 +346,14 @@ if __name__ == "__main__":
         model.load_state_dict(torch.load('sbatch_output/best_compiled_model.pth', weights_only=True))
     final_test_metrics = run_immutable_evaluation(model, test_loader)
     
+    peak_vram_mb = torch.cuda.max_memory_allocated(device) / 1024 / 1024
     print("\n" + "="*36 + " FINAL EXPERIMENT RESULTS " + "="*36)
     print(f"Test Localization F1: {final_test_metrics['localization_f1']:.6f}")
     print(f"Test Damage F1:       {final_test_metrics['damage_f1']:.6f}")
     print(f"Test xView2 Score:    {final_test_metrics['final_score']:.6f}")
+    print(f"Training Seconds:     {total_training_time:.1f}")
+    print(f"Total Seconds:        {time.time() - t_start:.1f}")
+    print(f"Peak VRAM (MB):       {peak_vram_mb:.1f}")
+    print(f"Num Steps:            {step}")
+    print(f"Num Params (M):       {sum(p.numel() for p in model.parameters()) / 1e6:.1f}")
     print("="*98)
