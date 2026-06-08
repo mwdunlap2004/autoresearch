@@ -141,7 +141,7 @@ class UNetDualHead(nn.Module):
         return torch.optim.AdamW([
             {'params': bb_params, 'lr': lr},
             {'params': bh_params, 'lr': lr},
-            {'params': dh_params, 'lr': lr},
+            {'params': dh_params, 'lr': lr * 2},
         ], weight_decay=1e-4)
 
 # ---------------------------------------------------------------------------
