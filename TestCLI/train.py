@@ -148,7 +148,7 @@ class UNetDualHead(nn.Module):
 # 3. Training Custom Loss Mechanics (Agent Is Allowed To Modify This)
 # ---------------------------------------------------------------------------
 bce_loss = nn.BCEWithLogitsLoss()
-ce_loss = nn.CrossEntropyLoss(reduction='none')
+damage_class_weights = torch.tensor([0.5, 0.8, 1.5, 2.0, 3.0])
 
 def dice_loss(pred, target, smooth=1e-6):
     pred = torch.sigmoid(pred)
@@ -160,9 +160,11 @@ def compute_dual_loss(building_out, damage_out, pre_mask, post_mask):
     pre_mask_unsq = pre_mask.unsqueeze(1).float()
     loss_b = bce_loss(building_out, pre_mask_unsq) + dice_loss(building_out, pre_mask_unsq)
     
-    # Masked Cross-Entropy for localized buildings
+    # Masked weighted Cross-Entropy for localized buildings
     mask = (pre_mask > 0)
-    m_ce = ce_loss(damage_out, post_mask)
+    weights = damage_class_weights.to(damage_out.device)
+    ce = nn.CrossEntropyLoss(reduction='none', weight=weights)
+    m_ce = ce(damage_out, post_mask)
     loss_d = (m_ce * mask).sum() / (mask.sum() + 1e-6)
     
     return loss_b + loss_d, loss_b, loss_d
