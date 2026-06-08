@@ -1,0 +1,7 @@
+commit	val_score	memory_gb	status	description
+404c628	0.146674	19.9	keep	baseline (U-Net dual-head, batch=12, TIME_BUDGET=120s)
+315834b	0.286693	19.9	keep	increase TIME_BUDGET 120s->900s (15 min)
+c8f128a	0.300337	19.9	keep	add OneCycleLR scheduler (base_lr=1e-3, max_lr=3e-3)
+d60d387	0.311103	19.9	keep	add class-weighted CE for damage head
+113f4e5	0.348231	15.1	keep	RandomCrop(640,640), batch=16, crop training (damage F1 0.270->0.336)
+fb94122	0.372421	15.1	keep	RandomResizedCrop(640,640,scale=0.5-1.0) for scale invariance (loc+dmg both improved)
