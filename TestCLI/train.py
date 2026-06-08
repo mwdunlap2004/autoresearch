@@ -52,7 +52,7 @@ TIME_BUDGET = 900       # Target training timeline in seconds (15 min wall clock
 BASE_LR = 1e-3           # Base learning rate (OneCycleLR will schedule around this)
 MAX_LR = 3e-3            # Peak LR for OneCycleLR
 PCT_START = 0.1          # Warmup fraction for OneCycleLR
-BATCH_SIZE = 12          # Set dynamically or overwritten manually
+BATCH_SIZE = 16          # Crops are smaller so we can increase batch size
 SEED = 42
 
 setup_seed(SEED)
@@ -247,6 +247,7 @@ if __name__ == "__main__":
     # Engine Ingestion
     base_folder = "content/data/xview2_jpeg"
     train_transform = A.Compose([
+        A.RandomCrop(640, 640, p=1.0),
         A.HorizontalFlip(p=0.5),
         A.VerticalFlip(p=0.5),
         A.RandomRotate90(p=0.5),
@@ -262,7 +263,7 @@ if __name__ == "__main__":
     model = UNetDualHead(config).to(device)
     #model = torch.compile(model, dynamic=False)
     optimizer = model.setup_optimizer(lr=BASE_LR)
-    ESTIMATED_STEPS = 650  # ~1.35 steps/sec * 900s / batch repeats
+    ESTIMATED_STEPS = 1500  # 640x640 crops ~2.5x fewer pixels than 1024x1024
     scheduler = torch.optim.lr_scheduler.OneCycleLR(
         optimizer, max_lr=MAX_LR, total_steps=ESTIMATED_STEPS,
         pct_start=PCT_START, div_factor=10, final_div_factor=100
