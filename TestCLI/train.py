@@ -50,7 +50,7 @@ class ModelConfig:
 # Global Optimization Setup
 TIME_BUDGET = 900       # Target training timeline in seconds (15 min wall clock)
 BASE_LR = 1e-3           # Base learning rate (OneCycleLR will schedule around this)
-MAX_LR = 3e-3            # Peak LR for OneCycleLR
+MAX_LR = 4e-3            # Peak LR for OneCycleLR (slightly higher with gradient clipping)
 PCT_START = 0.1          # Warmup fraction for OneCycleLR
 BATCH_SIZE = 16          # Crops are smaller so we can increase batch size
 SEED = 42
