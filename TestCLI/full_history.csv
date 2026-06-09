@@ -1,0 +1,48 @@
+commit,experiment,loc_f1,dmg_f1,composite,memory_gb,status,steps,description
+404c628,1,,,0.1467,19.9,keep,,baseline U-Net dual-head batch=12 TIME_BUDGET=120s plain CE
+315834b,2,,,0.2867,19.9,keep,,increase TIME_BUDGET 120s->900s
+c8f128a,3,,,0.3003,19.9,keep,,OneCycleLR base_lr=1e-3 max_lr=3e-3
+7ca2117,,,0.310,,,discard,,"SE blocks to DoubleConv (channel attention), reset — regressed vs 0.311"
+d60d387,4,,0.270,0.3111,19.9,keep,,class-weighted CE for damage head weights=[0.5 0.8 1.5 2.0 3.0]
+3d84c26,,,0.310,,,discard,,"SE blocks + batch=8, reset — 0.310 < 0.311 threshold"
+a15921c,,,0.311,,,discard,,"masked multi-class Dice loss for damage + loss weight 1.5x, reset — no gain"
+cce718f,,,0.311,,,discard,,"dedicated damage conv block + class-weighted CE, reset — no gain"
+32f6c5b,,,0.302,,,discard,,"Focal Loss + extra augmentations + cudnn benchmark, reset — marginal"
+94d6a49,,,0.310,,,discard,,"batch=8 + 1.25x capacity f1=40..f5=640, reset — regressed"
+113f4e5,5,,0.336,0.3482,15.1,keep,~1108,RandomCrop(640,640) batch=16 crop training steps 596->1108
+3679068,,,0.311,,,discard,,"batch=8 + SE blocks, reset — regressed"
+ee1b426,,,,,15.1,discard,,RandomCrop(512,512) batch=24 smaller crop benchmark
+92f56e7,,,,,15.1,discard,,batch_size 16->20 with crop training
+75748d7,,,,,OOM,discard,,crop training + 1.25x model capacity f1=40..f5=640 OOM during eval
+3de4f35,,,,,15.1,discard,,damage loss weight 1.5x matches 70% eval weight
+9af6b74,,,,,15.1,discard,,MAX_LR 3->5e-3 PCT_START 0.1->0.2 for crop training
+fb94122,6,0.435,0.346,0.3724,15.1,keep,,RandomResizedCrop(640,640,scale=0.5-1.0) scale invariance
+83cb807,7,0.473,0.359,0.3929,15.1,keep,,gradient clipping max_norm=1.0
+2a0eadd,,0.473,0.359,0.386,,discard,,ColorJitter augmentation collapsed to 0.386
+63df192,,,,0.3929,15.1,log,,"log results.tsv entry for gradient clipping exp"
+1f15c89,,,,0.3724,15.1,log,,"log results.tsv entry for RandomResizedCrop exp"
+89c8290,8,,0.389,0.3971,15.1,keep,,MAX_LR 3e-3->4e-3 with gradient clipping Dmg 0.359->0.389
+48af4c5,,,,0.366,,discard,,MAX_LR 4e-3->5e-3 with gradient clipping collapsed to 0.366
+7b927e8,,,,0.399,,discard,,RandomBrightnessContrast collapsed to 0.399
+d47c3b5,,,,,OOM,discard,,bottleneck f5: 512->640 1.1M extra params OOM
+ef3822d,,,,,crash,discard,,bottleneck f5: 512->576 IPC crash shape mismatch
+e3defe0,,,,,crash,discard,,"bottleneck f5: 512->576 fix CUDA alloc, still IPC crash"
+7597f1f,9,0.411,0.471,0.4529,15.1,keep,~1105,differential LR 2x damage head Dmg 0.389->0.471
+6a97e4e,,,,0.358,,discard,,building head 1.5x LR collapsed to 0.358
+e5df3b2,,,,0.362,,discard,,damage head 2.5x LR collapsed to 0.362
+710abb3,,,,,15.1,discard,,dedicated 3x3 damage feature conv before damage head regressed
+ff46af1,,,,,15.1,discard,,dedicated 3x3 damage conv + 2x LR for those params regressed
+a89c35b,,0.411,0.471,0.452,,discard,,"backbone LR 0.5x heads keep current LR — tied noise"
+612f9b2,,0.411,0.471,0.452,,discard,,"backbone LR 0.5x (amend) — tied noise"
+c783de7,,,,0.388,,discard,,"backbone LR 0.75x heads keep current LR — regressed to 0.388"
+0e4641c,,0.411,0.471,0.452,,discard,,"backbone 0.5x LR + RandomBrightnessContrast — tied noise"
+11eea43,,,,0.321,,discard,,pct_start 0.1->0.2 collapsed to 0.321
+cfb8e47,,,,0.407,,discard,,ESTIMATED_STEPS 1500->1100 to match actual steps 0.407 < 0.453
+c900a72,,,,0.407,,discard,,ESTIMATED_STEPS 1500->1100 (amend 1) 0.407
+99512bd,,,,0.407,,discard,,ESTIMATED_STEPS 1500->1200 (amend 2) 0.407
+2266dff,,,,0.4529,15.1,log,,"log results.tsv entries for 89c8290 and 7597f1f"
+c9c5378,,,,0.451,,discard,,"label_smoothing=0.1 to damage CE — 0.451 within noise"
+f5c210b,,,,0.403,,discard,,"label_smoothing=0.05 to damage CE — collapsed to 0.403"
+717349f,,,,0.361,,discard,,weight_decay 1e-4->1e-5 collapsed to 0.361
+474de9c,,,,0.338,,discard,,GaussNoise augmentation collapsed to 0.338
+348c21c,,,,0.412,,discard,,crop 640->704 larger spatial context 0.412 < 0.453

@@ -6,3 +6,5 @@ d60d387	0.311103	19.9	keep	add class-weighted CE for damage head
 113f4e5	0.348231	15.1	keep	RandomCrop(640,640), batch=16, crop training (damage F1 0.270->0.336)
 fb94122	0.372421	15.1	keep	RandomResizedCrop(640,640,scale=0.5-1.0) for scale invariance (loc+dmg both improved)
 83cb807	0.392868	15.1	keep	add gradient clipping (max_norm=1.0), Loc F1 0.435->0.473
+89c8290	0.397067	15.1	keep	MAX_LR 3e-3->4e-3 (with grad clip), Dmg F1 0.359->0.389
+7597f1f	0.452899	15.1	keep	differential LR (2x damage head), Dmg F1 0.389->0.471
